@@ -73,6 +73,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.graphviz",
     "zephyr.application",
+    "zephyr.boardselector",
     "zephyr.html_redirects",
     "zephyr.kconfig",
     "zephyr.dtcompatible-role",
@@ -152,6 +153,7 @@ html_context = {
     "display_vcs_link": True,
     "reference_links": {
         "API": f"{reference_prefix}/doxygen/html/index.html",
+        "Board Selector": f"{reference_prefix}/boardselector.html",
         "Kconfig Options": f"{reference_prefix}/kconfig.html",
         "Devicetree Bindings": f"{reference_prefix}/build/dts/api/bindings.html",
     }
