@@ -5,46 +5,180 @@
 
 /* Kconfig search */
 
-#__kconfig-search input {
-    border-radius: 5px;
-    border: 1px solid rgba(149, 157, 165, 0.2);
-    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px !important;
-    font-size: 18px;
-    margin-bottom: 0.5rem;
-    padding: 0.75rem;
+div.checkbox_select
+{
+  width: fit-content;
+  border-radius: 10px;
+}
+
+.checkbox_select_anchor:hover {
+    text-decoration: none;
+}
+
+.checkbox_select_anchor
+{
+  display: block;
+  background: #0d6efd;
+  color: white;
+  cursor: pointer;
+  padding: 5px 30px 5px 10px;
+  position: relative;
+  border-radius: 20px;
+}
+
+.filter-form .checkbox_select_anchor
+{
+    background: #aaa;
+    border-radius: 20px;
+}
+
+.checkbox_select_anchor:after
+{
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid #0a58ca;
+  content: "";
+  position: absolute;
+  right: 10px;
+  top: 15px;
+}
+
+.filter-form .checkbox_select_anchor:after
+{
+	border-top: 10px solid #999;
+}
+
+.filter-form .checkbox_select_anchor:hover:after
+{
+	border-top: 10px solid #aaa;
+}
+
+.filter-form .expanded .checkbox_select_anchor:after
+{
+	border-top: 0;
+	border-bottom: 10px solid #aaa;
+}
+
+.checkbox_select_anchor:hover
+{
+  background: #0d6efd !important;
+}
+
+.filter-form .checkbox_select_anchor:hover
+{
+    background: #999 !important;
+}
+
+
+.expanded .checkbox_select_anchor
+{
+    background: #7C1818;
+}
+
+.filter-form .expanded .checkbox_select_anchor
+{
+    background: #999;
+}
+
+div.checkbox_select .select_input
+{
     width: 100%;
+    cursor: pointer;
 }
 
-#__kconfig-search .search-summary {
-    margin: 0.25rem 0.1rem 1.5rem;
+.checkbox_select_dropdown
+{
+    display: none;
+    background: whitesmoke;
 }
 
-#__kconfig-search .search-nav {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.checkbox_select_dropdown.show
+{
+    display: block;
+    position: absolute;
+    z-index: 500;
 }
 
-#__kconfig-search .search-nav > p {
-    padding: 0 1rem;
-    margin: 0;
+.checkbox_select_dropdown ul
+{
+  max-height: 150px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #999;
+  border-top: 0;
+  border-bottom: 0;
+}
+.checkbox_select_dropdown ul li
+{
+  list-style: none;
+  position: relative;
+  color: #666;
+}
+.checkbox_select_dropdown ul li label
+{
+  position: relative;
+  padding: 10px 5px 5px 40px;
+  display: block;
+  cursor: pointer;
+}
+.checkbox_select_dropdown ul li label:hover
+{
+  background: #cbcbcb;
+  color: white;
+}
+.checkbox_select_dropdown ul li input:checked + label
+{
+  background: #bbb;
+  color: white;
+  text-shadow: 0px 1px 1px rgba(150, 150, 150, 1);
+}
+.checkbox_select_dropdown ul li input
+{
+  position: absolute;
+  left:0;
+  z-index:1;
+  display: inline-block;
+  height: 100%;
+  width: 30px;
+}
+.checkbox_select_search
+{
+    width: 200px;
+    padding: 10px 5px 5px;
+    border: 1px solid #999;
+    border-top: 0;
+    -webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
 }
 
-/* Kconfig entries */
+.checkbox_select_submit
+{
+    background: #0d6efd;
+    color: white;
+    padding: 10px 5px 5px;
+    border: 0;
+    width: 100%;
+    font-size: 14px;
+    cursor: pointer;
+}
 
-.kconfig ul {
-    margin-bottom: 0 !important;
+.hide
+{
+    display: none;
 }
 
 .chip {
     display: inline-block;
-    padding: 0 15px;
+    padding: 15px 5px;
     height: 30px;
     font-size: 12px;
     line-height: 30px;
     border-radius: 20px;
-    background-color: #2e7d32;
-    color: #fff;
 }
 
 .closebtn {
@@ -58,4 +192,8 @@
 
 .closebtn:hover {
     color: #000;
+}
+
+#filter-filter-checkboxes {
+    margin-top: 20px;
 }
