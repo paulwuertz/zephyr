@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Nordic Semiconductor ASA
+ * Copyright (c) Paul Würtz
  * SPDX-License-Identifier: Apache-2.0
  */
 

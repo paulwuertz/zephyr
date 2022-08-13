@@ -2,30 +2,17 @@
 Board Extension
 #################
 
-Copyright (c) 2022 Nordic Semiconductor ASA
+Copyright (c) 2022 Paul Würtz
 SPDX-License-Identifier: Apache-2.0
 
 Introduction
 ============
 
-This extension adds a new domain (``board``) for the Board language. Unlike
-many other domains, the Board options are not rendered by Sphinx directly but
+This extension adds a new domain (``boardselector``) for a selection of Boards.
+Unlike many other domains, the Board options are not rendered by Sphinx directly but
 on the client side using a database built by the extension. A special directive
-``.. board:search::`` can be inserted on any page to render a search box that
-allows to browse the database. References to Board options can be created by
-using the ``:board:option:`` role. Board options behave as regular domain
-objects, so they can also be referenced by other projects using Intersphinx.
-
-Options
-=======
-
-- board_generate_db: Set to True if you want to generate the Board database.
-  This is only required if you want to use the ``.. board:search::``
-  directive, not if you just need support for Board domain (e.g. when using
-  Intersphinx in another project). Defaults to False.
-- board_ext_paths: A list of base paths where to search for external modules
-  Board files when they use ``board-ext: True``. The extension will look for
-  ${BASE_PATH}/modules/${MODULE_NAME}/Board.
+``.. boardselector:boardsearch::`` can be inserted on any page to render a set of
+filter options to allows to browse the database of boards and filter them by peripherals.
 """
 
 from distutils.command.build import build
