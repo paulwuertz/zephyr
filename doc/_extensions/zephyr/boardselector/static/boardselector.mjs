@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-const DB_FILE = 'kconfig.json';
+const DB_FILE = 'board/board.json';
 const MAX_RESULTS = 10;
 
 /* search state */
@@ -199,7 +199,7 @@ function renderKconfigDefaults(parent, defaults, alt_defaults) {
  * Render a Kconfig entry.
  * @param {Object} entry Kconfig entry.
  */
-function renderKconfigEntry(entry) {
+function renderBoardEntry(entry) {
     const container = document.createElement('dl');
     container.className = 'kconfig';
 
@@ -215,59 +215,59 @@ function renderKconfigEntry(entry) {
     const nameText = document.createTextNode(entry.name);
     name.appendChild(nameText);
 
-    const permalink = document.createElement('a');
-    permalink.className = 'headerlink';
-    permalink.href = '#' + entry.name;
-    title.appendChild(permalink);
+    // const permalink = document.createElement('a');
+    // permalink.className = 'headerlink';
+    // permalink.href = '#' + entry.name;
+    // title.appendChild(permalink);
 
-    const permalinkText = document.createTextNode('\uf0c1');
-    permalink.appendChild(permalinkText);
+    // const permalinkText = document.createTextNode('\uf0c1');
+    // permalink.appendChild(permalinkText);
 
-    /* details */
-    const details = document.createElement('dd');
-    container.append(details);
+    // /* details */
+    // const details = document.createElement('dd');
+    // container.append(details);
 
-    /* prompt and help */
-    const prompt = document.createElement('p');
-    details.appendChild(prompt);
+    // /* prompt and help */
+    // const prompt = document.createElement('p');
+    // details.appendChild(prompt);
 
-    const promptTitle = document.createElement('em');
-    prompt.appendChild(promptTitle);
+    // const promptTitle = document.createElement('em');
+    // prompt.appendChild(promptTitle);
 
-    const promptTitleText = document.createTextNode('');
-    promptTitle.appendChild(promptTitleText);
-    if (entry.prompt) {
-        promptTitleText.nodeValue = entry.prompt;
-    } else {
-        promptTitleText.nodeValue = 'No prompt - not directly user assignable.';
-    }
+    // const promptTitleText = document.createTextNode('');
+    // promptTitle.appendChild(promptTitleText);
+    // if (entry.prompt) {
+    //     promptTitleText.nodeValue = entry.prompt;
+    // } else {
+    //     promptTitleText.nodeValue = 'No prompt - not directly user assignable.';
+    // }
 
-    if (entry.help) {
-        const help = document.createElement('p');
-        details.appendChild(help);
+    // if (entry.help) {
+    //     const help = document.createElement('p');
+    //     details.appendChild(help);
 
-        const helpText = document.createTextNode(entry.help);
-        help.appendChild(helpText);
-    }
+    //     const helpText = document.createTextNode(entry.help);
+    //     help.appendChild(helpText);
+    // }
 
-    /* symbol properties (defaults, selects, etc.) */
-    const props = document.createElement('dl');
-    props.className = 'field-list simple';
-    details.appendChild(props);
+    // /* symbol properties (defaults, selects, etc.) */
+    // const props = document.createElement('dl');
+    // props.className = 'field-list simple';
+    // details.appendChild(props);
 
-    renderKconfigPropLiteral(props, 'Type', entry.type);
-    if (entry.dependencies) {
-        renderKconfigPropList(props, 'Dependencies', [entry.dependencies]);
-    }
-    renderKconfigDefaults(props, entry.defaults, entry.alt_defaults);
-    renderKconfigPropList(props, 'Selects', entry.selects, false);
-    renderKconfigPropList(props, 'Selected by', entry.selected_by, true);
-    renderKconfigPropList(props, 'Implies', entry.implies, false);
-    renderKconfigPropList(props, 'Implied by', entry.implied_by, true);
-    renderKconfigPropList(props, 'Ranges', entry.ranges, false);
-    renderKconfigPropList(props, 'Choices', entry.choices, false);
-    renderKconfigPropLiteral(props, 'Location', `${entry.filename}:${entry.linenr}`);
-    renderKconfigPropLiteral(props, 'Menu path', entry.menupath);
+    // renderKconfigPropLiteral(props, 'Type', entry.type);
+    // if (entry.dependencies) {
+    //     renderKconfigPropList(props, 'Dependencies', [entry.dependencies]);
+    // }
+    // renderKconfigDefaults(props, entry.defaults, entry.alt_defaults);
+    // renderKconfigPropList(props, 'Selects', entry.selects, false);
+    // renderKconfigPropList(props, 'Selected by', entry.selected_by, true);
+    // renderKconfigPropList(props, 'Implies', entry.implies, false);
+    // renderKconfigPropList(props, 'Implied by', entry.implied_by, true);
+    // renderKconfigPropList(props, 'Ranges', entry.ranges, false);
+    // renderKconfigPropList(props, 'Choices', entry.choices, false);
+    // renderKconfigPropLiteral(props, 'Location', `${entry.filename}:${entry.linenr}`);
+    // renderKconfigPropLiteral(props, 'Menu path', entry.menupath);
 
     return container;
 }
@@ -275,32 +275,29 @@ function renderKconfigEntry(entry) {
 /** Perform a search and display the results. */
 function doSearch() {
     /* replace current state (to handle back button) */
-    history.replaceState({
-        value: input.value,
-        searchOffset: searchOffset
-    }, '', window.location);
+    // history.replaceState({
+    //     value: input.value,
+    //     searchOffset: searchOffset
+    // }, '', window.location);
 
-    /* nothing to search for */
-    if (!input.value) {
-        summaryText.nodeValue = '';
-        results.replaceChildren();
-        navigation.style.visibility = 'hidden';
-        return;
-    }
+    // /* nothing to search for */
+    // if (!input.value) {
+    //     summaryText.nodeValue = '';
+    //     results.replaceChildren();
+    //     navigation.style.visibility = 'hidden';
+    //     return;
+    // }
 
-    /* perform search */
-    let pattern = new RegExp(input.value, 'i');
+    // /* perform search */
+    // let pattern = new RegExp(input.value, 'i');
     let count = 0;
 
     const searchResults = db.filter(entry => {
-        if (entry.name.match(pattern)) {
+        if (entry.name) {
             count++;
-            if (count > searchOffset && count <= (searchOffset + MAX_RESULTS)) {
-                return true;
-            }
-        }
-
-        return false;
+            return true;
+        } else
+            return false;
     });
 
     /* show results count */
@@ -308,17 +305,17 @@ function doSearch() {
 
     /* update navigation */
     navigation.style.visibility = 'visible';
-    navigationPrev.disabled = searchOffset - MAX_RESULTS < 0;
-    navigationNext.disabled = searchOffset + MAX_RESULTS > count;
+    // navigationPrev.disabled = searchOffset - MAX_RESULTS < 0;
+    // navigationNext.disabled = searchOffset + MAX_RESULTS > count;
 
-    const currentPage = Math.floor(searchOffset / MAX_RESULTS) + 1;
-    const totalPages = Math.floor(count / MAX_RESULTS) + 1;
-    navigationPagesText.nodeValue = `Page ${currentPage} of ${totalPages}`;
+    // const currentPage = Math.floor(searchOffset / MAX_RESULTS) + 1;
+    // const totalPages = Math.floor(count / MAX_RESULTS) + 1;
+    // navigationPagesText.nodeValue = `Page ${currentPage} of ${totalPages}`;
 
     /* render Kconfig entries */
     results.replaceChildren();
     searchResults.forEach(entry => {
-        results.appendChild(renderKconfigEntry(entry));
+        results.appendChild(renderBoardEntry(entry));
     });
 }
 
@@ -336,19 +333,18 @@ function doSearchFromURL() {
     doSearch();
 }
 
-function setupKconfigSearch() {
-    /* populate kconfig-search container */
-    const container = document.getElementById('__kconfig-search');
+function setupBoardSearch() {
+    const container = document.getElementById('__board-search-results');
     if (!container) {
         console.error("Couldn't find Kconfig search container");
         return;
     }
-
-    /* create input field */
-    input = document.createElement('input');
-    input.placeholder = 'Type a Kconfig option name (RegEx allowed)';
-    input.type = 'text';
-    container.appendChild(input);
+    /* populate kconfig-search container - create input field TODO input fields for peripherals here or from json and not in python? */
+    // input = document.createElement('input');
+    // input.placeholder = 'Type a Kconfig option name (RegEx allowed)';
+    // input.type = 'text';
+    // container.appendChild(input);
+        /* populate kconfig-search container */
 
     /* create search summary */
     const searchSummary = document.createElement('p');
@@ -409,29 +405,29 @@ function setupKconfigSearch() {
             db = json;
 
             results.replaceChildren();
-
+            doSearch();
             /* perform initial search */
-            doSearchFromURL();
+            // doSearchFromURL(); TODO
 
             /* install event listeners */
-            input.addEventListener('keyup', () => {
-                searchOffset = 0;
-                doSearch();
-            });
+            // input.addEventListener('keyup', () => {
+            //     searchOffset = 0;
+            //     doSearch();
+            // }); TODO
 
             /* install hash change listener (for links) */
-            window.addEventListener('hashchange', doSearchFromURL);
+            // window.addEventListener('hashchange', doSearchFromURL); TODO
 
             /* handle back/forward navigation */
-            window.addEventListener('popstate', (event) => {
-                if (!event.state) {
-                    return;
-                }
+            // window.addEventListener('popstate', (event) => {
+            //     if (!event.state) {
+            //         return;
+            //     }
 
-                input.value = event.state.value;
-                searchOffset = event.state.searchOffset;
-                doSearch();
-            });
+            //     input.value = event.state.value;
+            //     searchOffset = event.state.searchOffset;
+            //     doSearch();
+            // }); TODO
         })
         .catch(error => {
             showError(`Kconfig database could not be loaded (${error})`);
@@ -687,6 +683,7 @@ var checkbox_select = function(params)
 
 $( document ).ready(function() {
     console.log( "ready!" );
+    // init filter chips
     for (let selectCheckbox of $(".filter-form")) {
         if(selectCheckbox.id) {
             new checkbox_select({
@@ -703,7 +700,7 @@ $( document ).ready(function() {
             });
         }
     }
-
+    // init filter selector
     new checkbox_select({
         selector : "#filter-filter-checkboxes",
         selected_translation : "Filters choosen",
@@ -718,6 +715,7 @@ $( document ).ready(function() {
         }
     });
 
+    setupBoardSearch();
 });
 
 //setupKconfigSearch();

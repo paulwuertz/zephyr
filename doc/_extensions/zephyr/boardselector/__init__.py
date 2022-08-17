@@ -161,6 +161,8 @@ class BoardSearchNode(nodes.Element):
 
                 <input type="submit" />
             </form>
+            <hr>
+            <div id="__board-search-results"></div>
         </div>"""
 
 
@@ -269,134 +271,7 @@ def board_build_resources(app: Sphinx) -> None:
 
     with progress_message("Building Board database..."):
         board, module_paths = board_load(app)
-        db = list()
-
-        for sc in chain(board.unique_defined_syms, board.unique_choices):
-            # skip nameless symbols
-            if not sc.name:
-                continue
-
-            # store alternative defaults (from defconfig files)
-            alt_defaults = list()
-            for node in sc.nodes:
-                if "defconfig" not in node.filename:
-                    continue
-
-                for value, cond in node.orig_defaults:
-                    fmt = kconfiglib.expr_str(value, sc_fmt)
-                    if cond is not sc.kconfig.y:
-                        fmt += f" if {kconfiglib.expr_str(cond, sc_fmt)}"
-                    alt_defaults.append([fmt, node.filename])
-
-            # build list of symbols that select/imply the current one
-            # note: all reverse dependencies are ORed together, and conditionals
-            # (e.g. select/imply A if B) turns into A && B. So we first split
-            # by OR to include all entries, and we split each one by AND to just
-            # take the first entry.
-            selected_by = list()
-            if isinstance(sc, kconfiglib.Symbol) and sc.rev_dep != sc.kconfig.n:
-                for select in kconfiglib.split_expr(sc.rev_dep, kconfiglib.OR):
-                    sym = kconfiglib.split_expr(select, kconfiglib.AND)[0]
-                    selected_by.append(f"CONFIG_{sym.name}")
-
-            implied_by = list()
-            if isinstance(sc, kconfiglib.Symbol) and sc.weak_rev_dep != sc.kconfig.n:
-                for select in kconfiglib.split_expr(sc.weak_rev_dep, kconfiglib.OR):
-                    sym = kconfiglib.split_expr(select, kconfiglib.AND)[0]
-                    implied_by.append(f"CONFIG_{sym.name}")
-
-            # only process nodes with prompt or help
-            nodes = [node for node in sc.nodes if node.prompt or node.help]
-
-            inserted_paths = list()
-            for node in nodes:
-                # avoid duplicate symbols by forcing unique paths. this can
-                # happen due to dependencies on 0, a trick used by some modules
-                path = f"{node.filename}:{node.linenr}"
-                if path in inserted_paths:
-                    continue
-                inserted_paths.append(path)
-
-                dependencies = None
-                if node.dep is not sc.kconfig.y:
-                    dependencies = kconfiglib.expr_str(node.dep, sc_fmt)
-
-                defaults = list()
-                for value, cond in node.orig_defaults:
-                    fmt = kconfiglib.expr_str(value, sc_fmt)
-                    if cond is not sc.kconfig.y:
-                        fmt += f" if {kconfiglib.expr_str(cond, sc_fmt)}"
-                    defaults.append(fmt)
-
-                selects = list()
-                for value, cond in node.orig_selects:
-                    fmt = kconfiglib.expr_str(value, sc_fmt)
-                    if cond is not sc.kconfig.y:
-                        fmt += f" if {kconfiglib.expr_str(cond, sc_fmt)}"
-                    selects.append(fmt)
-
-                implies = list()
-                for value, cond in node.orig_implies:
-                    fmt = kconfiglib.expr_str(value, sc_fmt)
-                    if cond is not sc.kconfig.y:
-                        fmt += f" if {kconfiglib.expr_str(cond, sc_fmt)}"
-                    implies.append(fmt)
-
-                ranges = list()
-                for min, max, cond in node.orig_ranges:
-                    fmt = (
-                        f"[{kconfiglib.expr_str(min, sc_fmt)}, "
-                        f"{kconfiglib.expr_str(max, sc_fmt)}]"
-                    )
-                    if cond is not sc.kconfig.y:
-                        fmt += f" if {kconfiglib.expr_str(cond, sc_fmt)}"
-                    ranges.append(fmt)
-
-                choices = list()
-                if isinstance(sc, kconfiglib.Choice):
-                    for sym in sc.syms:
-                        choices.append(kconfiglib.expr_str(sym, sc_fmt))
-
-                menupath = ""
-                iternode = node
-                while iternode.parent is not iternode.kconfig.top_node:
-                    iternode = iternode.parent
-                    if iternode.prompt:
-                        title = iternode.prompt[0]
-                    else:
-                        title = kconfiglib.standard_sc_expr_str(iternode.item)
-                    menupath = f" > {title}" + menupath
-
-                menupath = "(Top)" + menupath
-
-                filename = node.filename
-                for name, path in module_paths.items():
-                    if node.filename.startswith(path):
-                        filename = node.filename.replace(path, f"<module:{name}>")
-                        break
-
-                db.append(
-                    {
-                        "name": f"CONFIG_{sc.name}",
-                        "prompt": node.prompt[0] if node.prompt else None,
-                        "type": kconfiglib.TYPE_TO_STR[sc.type],
-                        "help": node.help,
-                        "dependencies": dependencies,
-                        "defaults": defaults,
-                        "alt_defaults": alt_defaults,
-                        "selects": selects,
-                        "selected_by": selected_by,
-                        "implies": implies,
-                        "implied_by": implied_by,
-                        "ranges": ranges,
-                        "choices": choices,
-                        "filename": filename,
-                        "linenr": node.linenr,
-                        "menupath": menupath,
-                    }
-                )
-
-        app.env.kconfig_db = db  # type: ignore
+        db = open(RESOURCES_DIR / "devices.json", "r").read()
 
         outdir = Path(app.outdir) / "board"
         outdir.mkdir(exist_ok=True)
@@ -404,7 +279,7 @@ def board_build_resources(app: Sphinx) -> None:
         board_db_file = outdir / "board.json"
 
         with open(board_db_file, "w") as f:
-            json.dump(db, f)
+            f.write(db)
 
     app.config.html_extra_path.append(board_db_file.as_posix())
     app.config.html_static_path.append(RESOURCES_DIR.as_posix())
