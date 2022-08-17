@@ -61,7 +61,7 @@ function showProgress(message) {
  * @param {String} title Title.
  * @param {String} content Content.
  */
-function renderKconfigPropLiteral(parent, title, content) {
+function renderBoardPeripheral(parent, title, content) {
     const term = document.createElement('dt');
     parent.appendChild(term);
 
@@ -71,133 +71,16 @@ function renderKconfigPropLiteral(parent, title, content) {
     const details = document.createElement('dd');
     parent.appendChild(details);
 
-    const code = document.createElement('code');
-    code.className = 'docutils literal';
-    details.appendChild(code);
-
     const literal = document.createElement('span');
-    literal.className = 'pre';
-    code.appendChild(literal);
+    details.appendChild(literal);
 
     const literalText = document.createTextNode(content);
     literal.appendChild(literalText);
 }
 
 /**
- * Render a Kconfig list property.
- * @param {Element} parent Parent element.
- * @param {String} title Title.
- * @param {list} elements List of elements.
- * @param {boolean} linkElements Whether to link elements (treat each element
- *                  as an unformatted option)
- */
-function renderKconfigPropList(parent, title, elements, linkElements) {
-    if (elements.length === 0) {
-        return;
-    }
-
-    const term = document.createElement('dt');
-    parent.appendChild(term);
-
-    const termText = document.createTextNode(title);
-    term.appendChild(termText);
-
-    const details = document.createElement('dd');
-    parent.appendChild(details);
-
-    const list = document.createElement('ul');
-    list.className = 'simple';
-    details.appendChild(list);
-
-    elements.forEach(element => {
-        const listItem = document.createElement('li');
-        list.appendChild(listItem);
-
-        if (linkElements) {
-            const link = document.createElement('a');
-            link.href = '#' + element;
-            listItem.appendChild(link);
-
-            const linkText = document.createTextNode(element);
-            link.appendChild(linkText);
-        } else {
-            /* using HTML since element content is pre-formatted */
-            listItem.innerHTML = element;
-        }
-    });
-}
-
-/**
- * Render a Kconfig list property.
- * @param {Element} parent Parent element.
- * @param {list} elements List of elements.
- * @returns
- */
-function renderKconfigDefaults(parent, defaults, alt_defaults) {
-    if (defaults.length === 0 && alt_defaults.length === 0) {
-        return;
-    }
-
-    const term = document.createElement('dt');
-    parent.appendChild(term);
-
-    const termText = document.createTextNode('Defaults');
-    term.appendChild(termText);
-
-    const details = document.createElement('dd');
-    parent.appendChild(details);
-
-    if (defaults.length > 0) {
-        const list = document.createElement('ul');
-        list.className = 'simple';
-        details.appendChild(list);
-
-        defaults.forEach(entry => {
-            const listItem = document.createElement('li');
-            list.appendChild(listItem);
-
-            /* using HTML since default content may be pre-formatted */
-            listItem.innerHTML = entry;
-        });
-    }
-
-    if (alt_defaults.length > 0) {
-        const list = document.createElement('ul');
-        list.className = 'simple';
-        list.style.display = 'none';
-        details.appendChild(list);
-
-        alt_defaults.forEach(entry => {
-            const listItem = document.createElement('li');
-            list.appendChild(listItem);
-
-            /* using HTML since default content may be pre-formatted */
-            listItem.innerHTML = `
-                ${entry[0]}
-                <em>at</em>
-                <code class="docutils literal">
-                    <span class"pre">${entry[1]}</span>
-                </code>`;
-        });
-
-        const show = document.createElement('a');
-        show.onclick = () => {
-            if (list.style.display === 'none') {
-                list.style.display = 'block';
-            } else {
-                list.style.display = 'none';
-            }
-        };
-        details.appendChild(show);
-
-        const showText = document.createTextNode('Show/Hide other defaults');
-        show.appendChild(showText);
-    }
-}
-
-/**
- * Render a Kconfig entry.
- * @param {Object} entry Kconfig entry.
+ * Render a board entry.
+ * @param {Object} entry board entry.
  */
 function renderBoardEntry(entry) {
     const container = document.createElement('dl');
@@ -223,24 +106,14 @@ function renderBoardEntry(entry) {
     // const permalinkText = document.createTextNode('\uf0c1');
     // permalink.appendChild(permalinkText);
 
-    // /* details */
-    // const details = document.createElement('dd');
-    // container.append(details);
+    /* details */
+    const details = document.createElement('dd');
+    container.append(details);
 
-    // /* prompt and help */
-    // const prompt = document.createElement('p');
-    // details.appendChild(prompt);
-
-    // const promptTitle = document.createElement('em');
-    // prompt.appendChild(promptTitle);
-
-    // const promptTitleText = document.createTextNode('');
-    // promptTitle.appendChild(promptTitleText);
-    // if (entry.prompt) {
-    //     promptTitleText.nodeValue = entry.prompt;
-    // } else {
-    //     promptTitleText.nodeValue = 'No prompt - not directly user assignable.';
-    // }
+    /* prompt and help */
+    const prompt = document.createElement('p');
+    details.appendChild(prompt);
+    prompt.innerHTML = "Peripherals:";
 
     // if (entry.help) {
     //     const help = document.createElement('p');
@@ -250,24 +123,24 @@ function renderBoardEntry(entry) {
     //     help.appendChild(helpText);
     // }
 
-    // /* symbol properties (defaults, selects, etc.) */
-    // const props = document.createElement('dl');
-    // props.className = 'field-list simple';
-    // details.appendChild(props);
+    /* symbol properties (defaults, selects, etc.) */
+    const props = document.createElement('dl');
+    props.className = 'field-list simple';
+    details.appendChild(props);
 
-    // renderKconfigPropLiteral(props, 'Type', entry.type);
-    // if (entry.dependencies) {
-    //     renderKconfigPropList(props, 'Dependencies', [entry.dependencies]);
-    // }
-    // renderKconfigDefaults(props, entry.defaults, entry.alt_defaults);
-    // renderKconfigPropList(props, 'Selects', entry.selects, false);
-    // renderKconfigPropList(props, 'Selected by', entry.selected_by, true);
-    // renderKconfigPropList(props, 'Implies', entry.implies, false);
-    // renderKconfigPropList(props, 'Implied by', entry.implied_by, true);
-    // renderKconfigPropList(props, 'Ranges', entry.ranges, false);
-    // renderKconfigPropList(props, 'Choices', entry.choices, false);
-    // renderKconfigPropLiteral(props, 'Location', `${entry.filename}:${entry.linenr}`);
-    // renderKconfigPropLiteral(props, 'Menu path', entry.menupath);
+    renderBoardPeripheral(props, 'gpio', entry.gpio.count);
+    renderBoardPeripheral(props, 'i2c', entry.i2c.count);
+    renderBoardPeripheral(props, 'spi', entry.spi.count);
+    renderBoardPeripheral(props, 'uart', entry.uart.count);
+    renderBoardPeripheral(props, 'can', entry.can.count);
+    renderBoardPeripheral(props, 'serial', entry.serial.count);
+    renderBoardPeripheral(props, 'quadspi', entry.quadspi.count);
+    renderBoardPeripheral(props, 'usart', entry.usart.count);
+    renderBoardPeripheral(props, 'adc', entry.adc.count);
+    renderBoardPeripheral(props, 'dac', entry.dac.count);
+    renderBoardPeripheral(props, 'pwm', entry.pwm.count);
+    renderBoardPeripheral(props, 'usb', entry.usb.count);
+    renderBoardPeripheral(props, 'ethernet', entry.ethernet.count);
 
     return container;
 }

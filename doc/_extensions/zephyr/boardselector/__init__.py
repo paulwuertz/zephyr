@@ -114,12 +114,12 @@ class BoardSearchNode(nodes.Element):
     @staticmethod
     def html():
         interesting_props = [
-            { "name": "cpu", "default_selected": True},
-            { "name": "flash", "default_selected": True},
-            { "name": "memory", "default_selected": True},
-            { "name": "timer", "default_selected": True},
+            # { "name": "cpu", "default_selected": True},
+            # { "name": "flash", "default_selected": True},
+            # { "name": "memory", "default_selected": True},
+            # { "name": "timer", "default_selected": True},
             { "name": "gpio", "default_selected": True},
-            { "name": "rtc", "default_selected": True},
+            # { "name": "rtc", "default_selected": True},
             { "name": "i2c", "default_selected": True},
             { "name": "spi", "default_selected": True},
             { "name": "uart", "default_selected": True},
@@ -132,9 +132,9 @@ class BoardSearchNode(nodes.Element):
             { "name": "can", "default_selected": True},
             { "name": "timers", "default_selected": True},
             { "name": "serial", "default_selected": True},
-            { "name": "sdmmc"},
-            { "name": "wdg"},
-            { "name": "quadspi"}
+            # { "name": "sdmmc"},
+            # { "name": "wdg"},
+            # { "name": "quadspi"}
         ]
         arches = ["arc", "arm", "arm64", "nios2", "posix", "riscv", "sparc", "x86", "xtensa"]
 
