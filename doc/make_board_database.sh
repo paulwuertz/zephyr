@@ -9,3 +9,4 @@ done < device_list.txt
 
 rm dts_temp/qemu_*
 rm dts_temp/xt-sim*
+python make_board_database.py

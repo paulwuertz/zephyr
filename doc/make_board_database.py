@@ -1,0 +1,123 @@
+import os, json
+from bs4 import BeautifulSoup
+from rst2html5 import HTML5Writer
+from devicetree import edtlib, dtlib
+from docutils.core import publish_parts
+
+# Get a list of all dts-board files
+dts_path = "dts_temp/"
+
+interesting_props = [
+    "timer", "gpio", "memory", "cpu", "rtc", "i2c", "spi", "uart",
+    "usart", "adc", "dac", "pwm", "usb", "ethernet", "sdmmc", "cpus",
+    "flash", "can", "timers", "serial", "wdg", "quadspi"
+]
+json_board_props = []
+board_interesting_feature_map = {}
+boards = [f for f in os.listdir(dts_path) if f.endswith(".dts")]
+arches = ["arc", "arm", "arm64", "nios2", "posix", "riscv", "sparc", "x86", "xtensa"]
+
+def get_arch_and_docu_map():
+    """traverse the boards dir and generate a board to arch+docu map"""
+    devices = {d:{"arch": None, "docu_html": ""} for d in open("device_list.txt", "r").read().split("\n")}
+    # map the architecture
+    for arch in arches:
+        # get the arch
+        for board in os.listdir("../boards/"+arch):
+            if board not in devices: continue
+            devices[board]["arch"] = arch
+    # map the board name to the board doc html page for stand-alone presentation TODO remove or maybe to extract image?
+    # for arch in arches:
+    #     # get the arch
+    #     for board in os.listdir("../../doc/_build/html/boards/"+arch):
+    #         if board not in devices: continue
+    #         doc_file = "../../doc/_build/html/boards/"+arch+"/"+board+"/doc/index.html"
+    #         try:
+    #             html_doc = open(doc_file).read()
+    #             soup = BeautifulSoup(html_doc, 'lxml')
+    #             find_by_class = soup.find_all(class_="rst-content")
+    #             if len(find_by_class) > 0:
+    #                 devices[board]["docu_html"] = str(find_by_class[0])
+    #                 #print(str(find_by_class[0]))
+    #             else:
+    #                 print("no rst content", find_by_class)
+    #         except Exception as e:
+    #             print("bad rst content", e)
+    #             devices[board]["docu_html"] = "Error generating the docs"
+    #         print(arch, board, board in devices)
+    return devices
+
+# get_arch_and_docu_map()
+# exit()
+#
+# Extract some features as dt tree
+#
+for board in boards:
+    board_name = board.replace(".dts", "")
+    props = {p:[] for p in interesting_props}
+    dt = dtlib.DT("dts_temp/"+board)
+    for n in dt.node_iter():
+        prop = n.name.split("@")[0]
+        if prop in interesting_props:
+            props[prop] += [n]
+    board_interesting_feature_map[board_name] = props
+
+#
+# Features dt to simpler json
+#
+arch_doc_map = get_arch_and_docu_map()
+for board_name, dt_preselect_props in board_interesting_feature_map.items():
+    json_board_prop = {
+        "cpus": {"cores_count": len(dt.get_node("/cpus").nodes)}
+    }
+
+    if "flash" in dt_preselect_props:
+        try:
+            flash_size =  dt_preselect_props["flash"][0].props["reg"].to_nums()[1]
+        except:
+            flash_size = 0
+        json_board_prop["flash"] = [{
+            "label": f.props["label"].to_string() if "label" in f.props else "_".join(f.labels),
+            "size": flash_size
+        } for f in dt_preselect_props["flash"]]
+        json_board_prop["main_flash_size"] = max([0] + [f["size"] for f in json_board_prop["flash"]])
+    else:
+        json_board_prop["main_flash_size"] = 0
+
+    if "memory" in dt_preselect_props:
+        json_board_prop["memory"] = [{
+            "label": f.props["label"].to_string() if "label" in f.props else "_".join(f.labels),
+            "size": f.props["reg"].to_nums()[1]
+        } for f in dt_preselect_props["memory"]]
+        json_board_prop["main_ram_size"] = max([0] + [f["size"] for f in json_board_prop["memory"]])
+    else:
+        json_board_prop["main_ram_size"] = 0
+
+    #"rtc"  TODO
+    #"timers", "timer", "rtc", "wdg" TODO
+
+    # How many and which pin - peripherals:
+    for periph in [
+        "gpio", "i2c", "spi", "uart", "can", "serial", "quadspi",
+        "usart", "adc", "dac", "pwm", "usb", "ethernet"
+    ]:
+        #if periph not in dt_preselect_props or not dt_preselect_props[periph]: continue
+        json_board_prop[periph] = {
+            "count": len(dt_preselect_props[periph]),
+            # TODO what are interesting props of
+            # "instances":[{
+            #     "label": f.props["label"].to_string() if "label" in f.props else "NO_LABEL"
+            # } for f in dt_preselect_props[periph]]
+        }
+    json_board_prop["name"] = board_name
+    #json_board_prop["arch"] = arch_doc_map[board_name]["arch"]
+    #json_board_prop["docu_html"] = arch_doc_map[board_name]["docu_html"]
+    json_board_props += [json_board_prop]
+
+#
+# Output to json
+#
+if os.path.isfile("device_json_temp"):
+    os.mkdir("device_json_temp")
+open("_extensions/zephyr/boardselector/static/devices.json", "w").write(json.dumps(json_board_props, indent=4, ensure_ascii=False))
+open("_extensions/zephyr/boardselector/static/devices.min.json", "w").write(json.dumps(json_board_props, ensure_ascii=False))
