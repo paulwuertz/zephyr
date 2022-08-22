@@ -62,6 +62,7 @@ function showProgress(message) {
  * @param {String} content Content.
  */
 function renderBoardPeripheral(parent, title, content) {
+    if(content === 0) return
     const term = document.createElement('dt');
     parent.appendChild(term);
 
@@ -110,37 +111,39 @@ function renderBoardEntry(entry) {
     const details = document.createElement('dd');
     container.append(details);
 
-    /* prompt and help */
-    const prompt = document.createElement('p');
-    details.appendChild(prompt);
-    prompt.innerHTML = "Peripherals:";
+    /* SRAM and Flash */
+    const memoryListing = document.createElement('p');
+    details.appendChild(memoryListing);
+    memoryListing.innerHTML = "Memory:";
 
-    // if (entry.help) {
-    //     const help = document.createElement('p');
-    //     details.appendChild(help);
+    const memoryProps = document.createElement('dl');
+    memoryProps.className = 'field-list simple';
+    details.appendChild(memoryProps);
 
-    //     const helpText = document.createTextNode(entry.help);
-    //     help.appendChild(helpText);
-    // }
+    renderBoardPeripheral(memoryProps, 'flash', entry.main_flash_size/1024+" kiB");
+    renderBoardPeripheral(memoryProps, 'ram', entry.main_ram_size/1024+" kiB");
 
-    /* symbol properties (defaults, selects, etc.) */
-    const props = document.createElement('dl');
-    props.className = 'field-list simple';
-    details.appendChild(props);
+    const peripheralsListing = document.createElement('p');
+    details.appendChild(peripheralsListing);
+    peripheralsListing.innerHTML = "Peripherals:";
 
-    renderBoardPeripheral(props, 'gpio', entry.gpio.count);
-    renderBoardPeripheral(props, 'i2c', entry.i2c.count);
-    renderBoardPeripheral(props, 'spi', entry.spi.count);
-    renderBoardPeripheral(props, 'uart', entry.uart.count);
-    renderBoardPeripheral(props, 'can', entry.can.count);
-    renderBoardPeripheral(props, 'serial', entry.serial.count);
-    renderBoardPeripheral(props, 'quadspi', entry.quadspi.count);
-    renderBoardPeripheral(props, 'usart', entry.usart.count);
-    renderBoardPeripheral(props, 'adc', entry.adc.count);
-    renderBoardPeripheral(props, 'dac', entry.dac.count);
-    renderBoardPeripheral(props, 'pwm', entry.pwm.count);
-    renderBoardPeripheral(props, 'usb', entry.usb.count);
-    renderBoardPeripheral(props, 'ethernet', entry.ethernet.count);
+    const peripheralProps = document.createElement('dl');
+    peripheralProps.className = 'field-list simple';
+    details.appendChild(peripheralProps);
+
+    renderBoardPeripheral(peripheralProps, 'gpio', entry.gpio.count);
+    renderBoardPeripheral(peripheralProps, 'i2c', entry.i2c.count);
+    renderBoardPeripheral(peripheralProps, 'spi', entry.spi.count);
+    renderBoardPeripheral(peripheralProps, 'uart', entry.uart.count);
+    renderBoardPeripheral(peripheralProps, 'can', entry.can.count);
+    renderBoardPeripheral(peripheralProps, 'serial', entry.serial.count);
+    renderBoardPeripheral(peripheralProps, 'quadspi', entry.quadspi.count);
+    renderBoardPeripheral(peripheralProps, 'usart', entry.usart.count);
+    renderBoardPeripheral(peripheralProps, 'adc', entry.adc.count);
+    renderBoardPeripheral(peripheralProps, 'dac', entry.dac.count);
+    renderBoardPeripheral(peripheralProps, 'pwm', entry.pwm.count);
+    renderBoardPeripheral(peripheralProps, 'usb', entry.usb.count);
+    renderBoardPeripheral(peripheralProps, 'ethernet', entry.ethernet.count);
 
     return container;
 }
@@ -213,11 +216,11 @@ function setupBoardSearch() {
         return;
     }
     /* populate kconfig-search container - create input field TODO input fields for peripherals here or from json and not in python? */
-    // input = document.createElement('input');
-    // input.placeholder = 'Type a Kconfig option name (RegEx allowed)';
-    // input.type = 'text';
-    // container.appendChild(input);
-        /* populate kconfig-search container */
+    input = document.createElement('input');
+    input.placeholder = 'Type a Kconfig option name (RegEx allowed)';
+    input.type = 'text';
+    container.appendChild(input);
+    /* populate kconfig-search container */
 
     /* create search summary */
     const searchSummary = document.createElement('p');
