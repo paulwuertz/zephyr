@@ -185,15 +185,6 @@ function doSearch() {
     /* show results count */
     summaryText.nodeValue = `${count} options match your search.`;
 
-    /* update navigation */
-    navigation.style.visibility = 'visible';
-    // navigationPrev.disabled = searchOffset - MAX_RESULTS < 0;
-    // navigationNext.disabled = searchOffset + MAX_RESULTS > count;
-
-    // const currentPage = Math.floor(searchOffset / MAX_RESULTS) + 1;
-    // const totalPages = Math.floor(count / MAX_RESULTS) + 1;
-    // navigationPagesText.nodeValue = `Page ${currentPage} of ${totalPages}`;
-
     /* render Kconfig entries */
     results.replaceChildren();
     searchResults.forEach(entry => {
@@ -240,44 +231,6 @@ function setupBoardSearch() {
     results = document.createElement('div');
     container.appendChild(results);
 
-    /* create search navigation */
-    navigation = document.createElement('div');
-    navigation.className = 'search-nav';
-    navigation.style.visibility = 'hidden';
-    container.appendChild(navigation);
-
-    navigationPrev = document.createElement('button');
-    navigationPrev.className = 'btn';
-    navigationPrev.disabled = true;
-    navigationPrev.onclick = () => {
-        searchOffset -= MAX_RESULTS;
-        doSearch();
-        window.scroll(0, 0);
-    }
-    navigation.appendChild(navigationPrev);
-
-    const navigationPrevText = document.createTextNode('Previous');
-    navigationPrev.appendChild(navigationPrevText);
-
-    const navigationPages = document.createElement('p');
-    navigation.appendChild(navigationPages);
-
-    navigationPagesText = document.createTextNode('');
-    navigationPages.appendChild(navigationPagesText);
-
-    navigationNext = document.createElement('button');
-    navigationNext.className = 'btn';
-    navigationNext.disabled = true;
-    navigationNext.onclick = () => {
-        searchOffset += MAX_RESULTS;
-        doSearch();
-        window.scroll(0, 0);
-    }
-    navigation.appendChild(navigationNext);
-
-    const navigationNextText = document.createTextNode('Next');
-    navigationNext.appendChild(navigationNextText);
-
     /* load database */
     showProgress('Loading database...');
 
@@ -293,7 +246,6 @@ function setupBoardSearch() {
 
             /* install event listeners */
             // input.addEventListener('keyup', () => {
-            //     searchOffset = 0;
             //     doSearch();
             // }); TODO
 
@@ -318,39 +270,12 @@ function setupBoardSearch() {
 
 var checkbox_select = function(params)
 {
-    // Error handling first
-    // ----------------------------------------------------------------------------------------------------
-    var error = false;
-    console.log(params.selector);
-    // If the selector is not given
-    if(!params.selector) {                                              console.error("selector needs to be defined"); error = true; }
-    // If the selector is not a string
-    if(typeof params.selector != "string") {                            console.error("selector needs to be a string"); error = true; }
-    // If the element is not a form
-    if(!$(params.selector).is("form")) {                                console.error("Element needs to be a form"); error = true; }
-    // If the element doesn't contain a select
-    if($(params.selector).find("select").length < 1) {                  console.error("Element needs to have a select in it"); error = true; }
-    // If the element doesn't contain option elements
-    if($(params.selector).find("option").length < 1) {                  console.error("Select element needs to have an option in it"); error = true; }
-    // If the select element doesn't have a name attribute
-    if($(params.selector).find('select').attr('name') == undefined) {   console.error("Select element needs to have a name attribute"); error = true; }
-
-    // If there was an error at all, dont continue in the code.
-    if(error)
-        return false;
-
-    // ----------------------------------------------------------------------------------------------------
-
     var that            = this,
         $_native_form   = $(params.selector),
         $_native_select = $_native_form.find('select'),
 
         // Variables
-        selector                = params.selector,
         select_name             = $_native_select.attr('name').charAt(0).toUpperCase() + $_native_select.attr('name').substr(1),
-        selected_translation    = params.selected_translation   ? params.selected_translation   : "selected",
-        all_translation         = params.all_translation        ? params.all_translation        : "All " + select_name + "s",
-        not_found_text          = params.not_found              ? params.not_found              : "No " + select_name + "s found.",
         currently_selected      = [],
         conjunctor              = params.conjunctor             ? params.conjunctor             : " or",
 
@@ -360,7 +285,6 @@ var checkbox_select = function(params)
         $_search        = $("<input />")    .addClass("checkbox_select_search"),
         $_submit        = $("<input />")    .addClass("checkbox_select_submit")     .val("Apply") .attr('type','submit') .data("selected", ""),
         $_dropdown_div  = $("<div />")      .addClass("checkbox_select_dropdown"),
-        $_not_found     = $("<span />")     .addClass("not_found hide")             .text(not_found_text),
         $_ul            = $("<ul />"),
 
         updateCurrentlySelected = function(){
@@ -436,13 +360,7 @@ var checkbox_select = function(params)
 		};
 
     // Event of this instance
-    that.onApply = typeof params.onApply == "function" ?
-
-                    params.onApply :
-
-                    function(e){
-                        //e.selected is accessible
-                    };
+    that.onApply = typeof params.onApply == "function" ? params.onApply : function(e){};
 
     that.update = function(){
         $_ul.empty();
@@ -453,8 +371,6 @@ var checkbox_select = function(params)
     }
 
     that.check = function(checkbox_name, checked){
-        //$_ul.find("input[type=checkbox][name=" + trim(checkbox_name) + "]").attr('checked', checked ? checked : false);
-
 		$_ul.find("input[type=checkbox]").each(function(){
 			// If this elements name is equal to the one sent in the function
 			if($(this).attr('name') == checkbox_name){
@@ -465,15 +381,12 @@ var checkbox_select = function(params)
 				return false;
 			}
 		});
-
         updateCurrentlySelected();
-
     }
 
     // Build mark up before pushing into page
     $_dropdown_div  .prepend($_search);
     $_dropdown_div  .append($_ul);
-    $_dropdown_div  .append($_not_found);
     $_dropdown_div  .append($_submit);
     $_dropdown_div  .appendTo($_parent_div);
     $_select_anchor .prependTo($_parent_div);
@@ -481,70 +394,39 @@ var checkbox_select = function(params)
     // Iterate through option elements
     that.update();
 
-    // Events
-
     // Actual dropdown action
-    $_select_anchor.click(
-
-        function(){
+    $_select_anchor.click(function(){
             apply();
-        }
-    );
+    });
 
     // Filters the checkboxes by search on keyup
-    $_search.keyup(
-
-        function(){
-            var search = $(this).val().toLowerCase().trim();
-
-            if( search.length == 1 ){
-                $_ul.find("label").each(
-
-                    function(){
-                        if($(this).text().toLowerCase().charAt(0) == search.charAt(0)){
-                            if($(this).parent().hasClass("hide"))
-                                $(this).parent().removeClass("hide");
-
-                            if(!$_not_found.hasClass("hide"))
-                                $_not_found.addClass("hide");
-                        }
-                        else{
-                            if(!$(this).parent().hasClass("hide"))
-                                $(this).parent().addClass("hide");
-
-                            if($_not_found.hasClass("hide"))
-                                $_not_found.removeClass("hide");
-                        }
-                    }
-                );
-            }
-            else{
-                // If it doesn't contain
-                if($_ul.text().toLowerCase().indexOf(search) == -1){
-                    if($_not_found.hasClass("hide"))
-                        $_not_found.removeClass("hide");
+    $_search.keyup(function(){
+        var search = $(this).val().toLowerCase().trim();
+        if( search.length == 1 ) {
+            $_ul.find("label").each(function(){
+                if($(this).text().toLowerCase().charAt(0) == search.charAt(0)){
+                    if($(this).parent().hasClass("hide"))
+                        $(this).parent().removeClass("hide");
                 }
                 else{
-                    if(!$_not_found.hasClass("hide"))
-                        $_not_found.addClass("hide");
+                    if(!$(this).parent().hasClass("hide"))
+                        $(this).parent().addClass("hide");
                 }
-
-                $_ul.find("label").each(
-
-                    function(){
-                        if($(this).text().toLowerCase().indexOf(search) > -1){
-                            if($(this).parent().hasClass("hide"))
-                                $(this).parent().removeClass("hide");
-                        }
-                        else{
-                            if(!$(this).parent().hasClass("hide"))
-                                $(this).parent().addClass("hide");
-                        }
-                    }
-                );
-            }
+            });
         }
-    );
+        else {
+            $_ul.find("label").each(function(){
+                if($(this).text().toLowerCase().indexOf(search) > -1){
+                    if($(this).parent().hasClass("hide"))
+                        $(this).parent().removeClass("hide");
+                }
+                else{
+                    if(!$(this).parent().hasClass("hide"))
+                        $(this).parent().addClass("hide");
+                }
+            });
+        }
+    });
 
     $_submit.click(
         function(e){
@@ -564,20 +446,13 @@ var checkbox_select = function(params)
 };
 
 $( document ).ready(function() {
-    console.log( "ready!" );
     // init filter chips
     for (let selectCheckbox of $(".filter-form")) {
         let filterKey = selectCheckbox.id.replace("filter-form-", "");
         if(selectCheckbox.id) {
             new checkbox_select({
                 selector : "#"+selectCheckbox.id,
-                selected_translation : "Filters choosen",
-                all_translation : "All filters active",
-                not_found : "No boards matched your filters...",
-
-                // Event during initialization
-                onApply : function(e)
-                {
+                onApply : function(e) {
                     if(e["selected"].length > 0) {
                         activeFilters[filterKey] = e["selected"].map(i => parseInt(i));
                     } else {
@@ -592,14 +467,9 @@ $( document ).ready(function() {
     // init filter selector
     new checkbox_select({
         selector : "#filter-filter-checkboxes",
-        selected_translation : "Filters choosen",
-        all_translation : "All filters active",
-        not_found : "No boards matched your filters...",
         conjunctor: " and",
-
         // Event during initialization
-        onApply : function(e)
-        {
+        onApply : function(e) {
             alert("Custom Event: " + e.selected);
         }
     });
