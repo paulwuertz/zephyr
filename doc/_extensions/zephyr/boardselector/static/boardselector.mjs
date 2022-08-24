@@ -18,6 +18,7 @@ let navigation;
 let navigationPagesText;
 let navigationPrev;
 let navigationNext;
+let activeFilters = {};
 
 /**
  * Show an error message.
@@ -169,6 +170,11 @@ function doSearch() {
     let count = 0;
 
     const searchResults = db.filter(entry => {
+        for (let [filter, filteredValues] of Object.entries(activeFilters)) {
+            if ( !filteredValues.includes( entry[filter]["count"] )) {
+                return false;
+            }
+        }
         if (entry.name) {
             count++;
             return true;
@@ -216,10 +222,10 @@ function setupBoardSearch() {
         return;
     }
     /* populate kconfig-search container - create input field TODO input fields for peripherals here or from json and not in python? */
-    input = document.createElement('input');
-    input.placeholder = 'Type a Kconfig option name (RegEx allowed)';
-    input.type = 'text';
-    container.appendChild(input);
+    // input = document.createElement('input');
+    // input.placeholder = 'Type a Kconfig option name (RegEx allowed)';
+    // input.type = 'text';
+    // container.appendChild(input);
     /* populate kconfig-search container */
 
     /* create search summary */
@@ -561,6 +567,7 @@ $( document ).ready(function() {
     console.log( "ready!" );
     // init filter chips
     for (let selectCheckbox of $(".filter-form")) {
+        let filterKey = selectCheckbox.id.replace("filter-form-", "");
         if(selectCheckbox.id) {
             new checkbox_select({
                 selector : "#"+selectCheckbox.id,
@@ -571,7 +578,13 @@ $( document ).ready(function() {
                 // Event during initialization
                 onApply : function(e)
                 {
-                    alert("Custom Event: " + e.selected);
+                    if(e["selected"].length > 0) {
+                        activeFilters[filterKey] = e["selected"].map(i => parseInt(i));
+                    } else {
+                        delete activeFilters[filterKey];
+                    }
+                    results.replaceChildren();
+                    doSearch();
                 }
             });
         }
