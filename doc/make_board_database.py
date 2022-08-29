@@ -111,7 +111,7 @@ for board_name, dt_preselect_props in board_interesting_feature_map.items():
             # } for f in dt_preselect_props[periph]]
         }
     json_board_prop["name"] = board_name
-    #json_board_prop["arch"] = arch_doc_map[board_name]["arch"]
+    json_board_prop["arch"] = arch_doc_map[board_name]["arch"]
     #json_board_prop["docu_html"] = arch_doc_map[board_name]["docu_html"]
     json_board_props += [json_board_prop]
 

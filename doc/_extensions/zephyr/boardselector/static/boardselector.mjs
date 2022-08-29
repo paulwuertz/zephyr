@@ -171,8 +171,18 @@ function doSearch() {
 
     const searchResults = db.filter(entry => {
         for (let [filter, filteredValues] of Object.entries(activeFilters)) {
-            if ( !filteredValues.includes( entry[filter]["count"] )) {
-                return false;
+            switch (filter) {
+                case "arch":
+                    if( !filteredValues.includes( entry["arch"] )) {
+                        return false;
+                    }
+                    break;
+
+                default:
+                    if ( !filteredValues.includes( entry[filter]["count"] )) {
+                        return false;
+                    }
+                    break;
             }
         }
         if (entry.name) {
@@ -275,7 +285,15 @@ function init_select_multiple_filter(id, filterKey) {
         showSelectedText: true,
         onApply : function(e) {
             if(e["selected"].length > 0) {
-                activeFilters[filterKey] = e["selected"].map(i => parseInt(i));
+                switch (filterKey) {
+                    case "arch":
+                        activeFilters[filterKey] = e["selected"];
+                        break;
+
+                    default:
+                        activeFilters[filterKey] = e["selected"].map(i => parseInt(i));
+                        break;
+                }
             } else {
                 delete activeFilters[filterKey];
             }
