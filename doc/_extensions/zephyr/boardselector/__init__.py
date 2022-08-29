@@ -150,7 +150,7 @@ class BoardSearchNode(nodes.Element):
             </form>''' for i in interesting_props
         )
         filter_options = "\n".join(f'<option data-count="{i}" value="{p["name"]}">{p["name"].upper()}</option>' for i, p in enumerate(interesting_props))
-        return f"""<div>
+        return f"""<div id="board-search">
             {default_options}
             <form id="filter-filter-checkboxes" class="checkbox_select">
                 <select name="Add a Board filter" id="add-filters" multiple="multiple">

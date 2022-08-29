@@ -157,39 +157,33 @@ function doSearch() {
     //     searchOffset: searchOffset
     // }, '', window.location);
 
-    // /* nothing to search for */
-    // if (!input.value) {
-    //     summaryText.nodeValue = '';
-    //     results.replaceChildren();
-    //     navigation.style.visibility = 'hidden';
-    //     return;
-    // }
-
     // /* perform search */
-    // let pattern = new RegExp(input.value, 'i');
     let count = 0;
 
     const searchResults = db.filter(entry => {
         for (let [filter, filteredValues] of Object.entries(activeFilters)) {
             switch (filter) {
                 case "arch":
-                    if( !filteredValues.includes( entry["arch"] )) {
+                    if( !filteredValues.includes( entry["arch"] ))
                         return false;
-                    }
                     break;
 
                 default:
-                    if ( !filteredValues.includes( entry[filter]["count"] )) {
+                    if ( !filteredValues.includes( entry[filter]["count"] ))
                         return false;
-                    }
-                    break;
             }
+        }
+        let boardName = document.getElementById('board-name-search').value
+        let pattern = new RegExp(boardName, 'i');
+        if (boardName.trim() && !pattern.test(entry.name)) {
+            return false;
         }
         if (entry.name) {
             count++;
             return true;
-        } else
+        } else {
             return false;
+        }
     });
 
     /* show results count */
@@ -218,16 +212,18 @@ function doSearchFromURL() {
 
 function setupBoardSearch() {
     const container = document.getElementById('__board-search-results');
+    const filterContainer = document.getElementById('board-search')
     if (!container) {
         console.error("Couldn't find Board search container");
         return;
     }
     /* populate kconfig-search container - create input field TODO input fields for peripherals here or from json and not in python? */
-    // input = document.createElement('input');
-    // input.placeholder = 'Type a Kconfig option name (RegEx allowed)';
-    // input.type = 'text';
-    // container.appendChild(input);
-    /* populate kconfig-search container */
+    input = document.createElement('input');
+    input.id = 'board-name-search'
+    input.placeholder = 'Type a board name (RegEx allowed)';
+    input.type = 'text';
+    input.onchange = doSearch;
+    filterContainer.prepend(input);
 
     /* create search summary */
     const searchSummary = document.createElement('p');
