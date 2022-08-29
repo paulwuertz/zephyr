@@ -113,43 +113,41 @@ def board_load(app: Sphinx) -> Tuple[kconfiglib.Kconfig, Dict[str, str]]:
 class BoardSearchNode(nodes.Element):
     @staticmethod
     def html():
-        interesting_props = [
-            # { "name": "cpu", "default_selected": True},
-            # { "name": "flash", "default_selected": True},
-            # { "name": "memory", "default_selected": True},
-            # { "name": "timer", "default_selected": True},
-            { "name": "gpio", "default_selected": True},
-            # { "name": "rtc", "default_selected": True},
-            { "name": "i2c", "default_selected": True},
-            { "name": "spi", "default_selected": True},
-            { "name": "uart", "default_selected": True},
-            { "name": "usart", "default_selected": True},
-            { "name": "adc", "default_selected": True},
-            { "name": "dac", "default_selected": True},
-            { "name": "pwm", "default_selected": True},
-            { "name": "usb", "default_selected": True},
-            { "name": "ethernet", "default_selected": True},
-            { "name": "can", "default_selected": True},
-            { "name": "timers", "default_selected": True},
-            { "name": "serial", "default_selected": True},
-            # { "name": "sdmmc"},
-            # { "name": "wdg"},
-            # { "name": "quadspi"}
-        ]
         arches = ["arc", "arm", "arm64", "nios2", "posix", "riscv", "sparc", "x86", "xtensa"]
+        number_options = ["0", "1" , "2", "3", "4+"]
+        interesting_props = [
+            { "name": "arch", "options": arches},
+            # { "name": "cpu",,
+            # { "name": "flash",,
+            # { "name": "memory",,
+            { "name": "timer", "options": number_options},
+            { "name": "gpio", "options": number_options},
+            { "name": "rtc", "options": number_options},
+            { "name": "i2c", "options": number_options},
+            { "name": "spi", "options": number_options},
+            { "name": "uart", "options": number_options},
+            { "name": "usart", "options": number_options},
+            { "name": "adc", "options": number_options},
+            { "name": "dac", "options": number_options},
+            { "name": "pwm", "options": number_options},
+            { "name": "usb", "options": number_options},
+            { "name": "ethernet", "options": number_options},
+            { "name": "can", "options": number_options},
+            { "name": "timers", "options": number_options},
+            { "name": "serial", "options": number_options},
+            { "name": "sdmmc", "options": number_options},
+            { "name": "wdg", "options": number_options},
+            { "name": "quadspi", "options": number_options}
+        ]
 
+        close_option_str = "</option>"
         default_options = "\n".join(f'''
             <form id="filter-form-{i["name"]}" class="checkbox_select filter-form chip">
-                <select name="{i["name"].upper()}" id="add-filters" multiple="multiple">
-                    <option value="0">0</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4+">4+</option>
+                <select name="{i["name"].upper()}" id="add-filters-{i["name"]}" multiple="multiple">
+                    {"".join([f"<option value='{opt}'>{opt}{close_option_str}" for opt in i["options"]])}
                 </select>
-
                 <input type="submit" />
-            </form>''' for i in interesting_props if "default_selected" in i and i["default_selected"]
+            </form>''' for i in interesting_props
         )
         filter_options = "\n".join(f'<option data-count="{i}" value="{p["name"]}">{p["name"].upper()}</option>' for i, p in enumerate(interesting_props))
         return f"""<div>

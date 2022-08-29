@@ -99,7 +99,8 @@ for board_name, dt_preselect_props in board_interesting_feature_map.items():
     # How many and which pin - peripherals:
     for periph in [
         "gpio", "i2c", "spi", "uart", "can", "serial", "quadspi",
-        "usart", "adc", "dac", "pwm", "usb", "ethernet"
+        "usart", "adc", "dac", "pwm", "usb", "ethernet", "timer",
+        "rtc", "adc", "dac", "timers", "serial", "sdmmc"
     ]:
         #if periph not in dt_preselect_props or not dt_preselect_props[periph]: continue
         json_board_prop[periph] = {

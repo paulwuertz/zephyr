@@ -209,7 +209,7 @@ function doSearchFromURL() {
 function setupBoardSearch() {
     const container = document.getElementById('__board-search-results');
     if (!container) {
-        console.error("Couldn't find Kconfig search container");
+        console.error("Couldn't find Board search container");
         return;
     }
     /* populate kconfig-search container - create input field TODO input fields for peripherals here or from json and not in python? */
@@ -268,6 +268,23 @@ function setupBoardSearch() {
         });
 }
 
+function init_select_multiple_filter(id, filterKey) {
+    new checkbox_select({
+        selector : "#"+id,
+        filterKey: filterKey,
+        showSelectedText: true,
+        onApply : function(e) {
+            if(e["selected"].length > 0) {
+                activeFilters[filterKey] = e["selected"].map(i => parseInt(i));
+            } else {
+                delete activeFilters[filterKey];
+            }
+            results.replaceChildren();
+            doSearch();
+        }
+    });
+}
+
 var checkbox_select = function(params)
 {
     var that            = this,
@@ -289,14 +306,10 @@ var checkbox_select = function(params)
 
         updateCurrentlySelected = function(){
             var selected = [], selected_display_string = "";
-
-            $_ul.find("input:checked").each(
-
-                function(){
-                    selected.push($(this).val());
-                    selected_display_string += $(this).val().toLocaleUpperCase() + ", "
-                }
-            );
+            $_ul.find("input:checked").each(function(){
+                selected.push($(this).val());
+                selected_display_string += $(this).val().toLocaleUpperCase() + ", "
+            });
             selected_display_string = selected_display_string.substring(0, selected_display_string.length - 2)
             let last_comma = selected_display_string.lastIndexOf(",")
             if (last_comma != -1) {
@@ -307,13 +320,11 @@ var checkbox_select = function(params)
 
             currently_selected = selected;
 
-            if(selected.length == 0){
+            if (selected.length == 0 || !params.showSelectedText) {
                 $_select_anchor.text( select_name )
-            }
-            else if(selected.length == 1){
+            } else if(selected.length == 1) {
                 $_select_anchor.text( selected_display_string + " " + select_name );
-            }
-            else{
+            } else {
                 $_select_anchor.text( selected_display_string + " " + select_name + "s" );
             }
         },
@@ -323,18 +334,13 @@ var checkbox_select = function(params)
             var uID             = 'checkbox_select_' + select_name + "_" + name.replace(" ", "_"),
                 $_li            = $("<li />"),
                 $_checkbox      = $("<input />").attr({
-                                            'name'  : name,
-                                            'id'    : uID,
-                                            'type'  : "checkbox",
-                                            'value' : value
-                                        }
-                                    )
-                                    .click(
-
-                                        function(){
-                                            updateCurrentlySelected();
-                                        }
-                                    ),
+                                        'name'  : name,
+                                        'id'    : uID,
+                                        'type'  : "checkbox",
+                                        'value' : value
+                                    }).click(function(){
+                                        updateCurrentlySelected();
+                                    }),
 
                 $_label         = $("<label />").attr('for', uID),
                 $_name_span     = $("<span />").text(name).prependTo($_label);
@@ -359,9 +365,9 @@ var checkbox_select = function(params)
 			}
 		};
 
+    $_select_anchor[0].id = params.filterKey + "_checkbox_select_anchor"
     // Event of this instance
     that.onApply = typeof params.onApply == "function" ? params.onApply : function(e){};
-
     that.update = function(){
         $_ul.empty();
         $_native_select.find("option").each(function(i){
@@ -407,8 +413,8 @@ var checkbox_select = function(params)
                 if($(this).text().toLowerCase().charAt(0) == search.charAt(0)){
                     if($(this).parent().hasClass("hide"))
                         $(this).parent().removeClass("hide");
-                }
-                else{
+
+                } else{
                     if(!$(this).parent().hasClass("hide"))
                         $(this).parent().addClass("hide");
                 }
@@ -419,8 +425,7 @@ var checkbox_select = function(params)
                 if($(this).text().toLowerCase().indexOf(search) > -1){
                     if($(this).parent().hasClass("hide"))
                         $(this).parent().removeClass("hide");
-                }
-                else{
+                } else{
                     if(!$(this).parent().hasClass("hide"))
                         $(this).parent().addClass("hide");
                 }
@@ -428,12 +433,10 @@ var checkbox_select = function(params)
         }
     });
 
-    $_submit.click(
-        function(e){
-            e.preventDefault();
-            apply();
-        }
-    );
+    $_submit.click(function(e){
+        e.preventDefault();
+        apply();
+    });
 
     // Delete the original form submit
     $(params.selector).find('input[type=submit]').remove();
@@ -450,27 +453,21 @@ $( document ).ready(function() {
     for (let selectCheckbox of $(".filter-form")) {
         let filterKey = selectCheckbox.id.replace("filter-form-", "");
         if(selectCheckbox.id) {
-            new checkbox_select({
-                selector : "#"+selectCheckbox.id,
-                onApply : function(e) {
-                    if(e["selected"].length > 0) {
-                        activeFilters[filterKey] = e["selected"].map(i => parseInt(i));
-                    } else {
-                        delete activeFilters[filterKey];
-                    }
-                    results.replaceChildren();
-                    doSearch();
-                }
-            });
+            init_select_multiple_filter(selectCheckbox.id, filterKey)
         }
     }
     // init filter selector
     new checkbox_select({
         selector : "#filter-filter-checkboxes",
         conjunctor: " and",
+        showSelectedText: false,
         // Event during initialization
         onApply : function(e) {
-            alert("Custom Event: " + e.selected);
+            $(".checkbox_select_anchor").addClass("hide")
+            for (const sel of e.selected) {
+                $("#"+ sel +"_checkbox_select_anchor").removeClass("hide")
+            }
+            $("#undefined_checkbox_select_anchor").removeClass("hide")
         }
     });
 
